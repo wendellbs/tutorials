@@ -1,0 +1,190 @@
+![](https://cdn-images-1.medium.com/max/1566/1*_NQN6_YnxS29m8vFzWYlEg.png)
+
+Tutorial para configurar o Docker e docker-compose no linux de arquitetura Debian (Ubuntu, Mint, etc).
+
+## Setup do docker:
+1. Remova versões anteriores do Docker do seu sistema
+
+```
+sudo apt-get remove docker docker-engine docker.io
+sudo apt-get update
+```
+
+2. Instale o docker
+
+```
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+sudo apt-get update
+sudo apt-get install docker-ce
+```
+
+3. Verifique se o docker foi instalado corretamente
+
+`sudo docker version`
+
+Você deve ter uma saída parecida com esta:
+
+```
+Client:
+ Version:	17.12.0-ce
+ API version:	1.35
+ Go version:	go1.9.2
+ Git commit:	c97c6d6
+ Built:	Wed Dec 27 20:03:51 2017
+ OS/Arch:	darwin/amd64
+
+Server:
+ Engine:
+  Version:	17.12.0-ce
+  API version:	1.35 (minimum version 1.12)
+  Go version:	go1.9.2
+  Git commit:	c97c6d6
+  Built:	Wed Dec 27 20:12:29 2017
+  OS/Arch:	linux/amd64
+  Experimental:	true
+```
+
+4. Rodar comandos docker sem sudo:
+
+Para rodar os comandos de docker sem sudo execute os seguintes comando:
+
+```
+sudo groupadd docker
+sudo usermod -aG docker $USER
+```
+
+**Desloga e loga novamente.**
+
+
+5. Rode uma aplicação de teste para ver se está tudo certo
+
+`docker run hello-world`
+
+Você deverá ter uma saída parecida com isso:
+
+```
+Unable to find image 'hello-world:latest' locally
+latest: Pulling from library/hello-world
+
+Hello from Docker!
+This message shows that your installation appears to be working correctly.
+
+To generate this message, Docker took the following steps:
+ 1. The Docker client contacted the Docker daemon.
+ 2. The Docker daemon pulled the "hello-world" image from the Docker Hub.
+ 3. The Docker daemon created a new container from that image which runs the
+    executable that produces the output you are currently reading.
+ 4. The Docker daemon streamed that output to the Docker client, which sent it
+    to your terminal.
+
+To try something more ambitious, you can run an Ubuntu container with:
+ $ docker run -it ubuntu bash
+
+Share images, automate workflows, and more with a free Docker ID:
+ https://cloud.docker.com/
+
+For more examples and ideas, visit:
+ https://docs.docker.com/engine/userguide/
+```
+
+***
+
+## Setup do docker compose:
+1. Instale o docker compose
+
+```
+sudo curl -L https://github.com/docker/compose/releases/download/1.15.0/docker-compose-`uname -s`-`uname -m` -o /usr/local/bin/docker-compose
+sudo chmod +x /usr/local/bin/docker-compose
+```
+
+2. Verifica se foi instalado corretamente:
+
+`docker-compose --version`
+
+Você deve ter uma saída parecida com esta:
+
+`docker-compose version 1.18.0, build 8dd22a9`
+
+***
+
+# Extra:
+Alguns comandos úteis para a utilização de docker e docker compose.
+
+* Rodar docker gerando porta aleatoria
+
+`docker run -d -P dockersamples/static-site`
+
+* Ver porta do docker
+
+`docker port 45521f993ba2`
+
+* Parar docker imediatamente
+
+`docker stop -t 0 d9c62f0b84f9`
+
+* Nomear docker
+
+`docker run -d -P --name meu-docker dockersamples/static-site`
+
+* Atribuindo variavel de ambinete
+
+`docker run -d -P -e AUTHOR="Wendell L" dockersamples/static-site`
+
+* Parando todos os containers de uma so vez
+
+`docker stop $(docker ps -q)`
+
+* Mapear volume customizado
+
+`docker run -it -v "C:\Users\Alura\Desktop:/var/www" ubuntu`
+
+* Parâmetros extras
+
+```
+docker run -p 8080:3000 -v "/Users/wendell/code/teste/volume-exemplo:/var/www" -w "/var/www" node npm start
+->  -w = workdir
+-> npm start = roda comando dentro do docker
+```
+
+* Rodar comando dinamicamente
+
+`docker run -p 8080:3000 -v "$(pwd):/var/www" -w "/var/www" node npm start`
+
+* Criar imagem a partir de Dockerfile
+
+`docker build -f Dockerfile -t meudockerhub/node .`
+
+* Criar rede
+
+`docker network create --driver bridge minha-rede`
+
+* Rodar docker em uma rede especifica
+
+`docker run -it -p 8000:8000 --name api --network minha-rede wendelllbs/conecta-api`
+
+* Criar Docker mysql
+
+`docker run -d --name=db --network minha-rede --env="MYSQL_ROOT_PASSWORD=root" mysql`
+
+* acessar docker mysql
+
+`docker exec -it djangodocker_db_1 mysql -u root -p`
+
+
+* Acessar container pelo shell
+
+`docker exec -ti web bash`
+
+* Para ver os logs de um container
+
+`docker-compose logs web`
+
+## Instalar o kubectl
+Para se comunicar com o kubernetes diretamente, deve-se instalar o kubectl. Basta executar os seguintes comandos:
+
+```
+curl -LO https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl
+chmod +x ./kubectl
+sudo mv ./kubectl /usr/local/bin/kubectl
+```
